@@ -23,31 +23,31 @@ export function GdaPublicNav() {
           <LogoInline />
         </Link>
 
-        <div className="hidden lg:flex items-center gap-1 flex-wrap justify-end">
+        <div className="hidden lg:flex items-center gap-0.5 flex-wrap justify-end">
           {links.map((item) => (
             <Link
               key={item.name}
               href={item.href}
-              className="px-3 py-2 label text-white/60 hover:text-white border border-transparent hover:border-white/20 transition-all text-xs sm:text-sm"
+              className="px-2 py-1.5 label text-[10px] tracking-[0.14em] text-white/60 hover:text-white border border-transparent hover:border-white/20 transition-all"
             >
               {item.name}
             </Link>
           ))}
           <Link
             href="/contact?topic=donate"
-            className="px-3 py-2 label text-white/50 hover:text-white transition-colors text-xs sm:text-sm"
+            className="px-2 py-1.5 label text-[10px] tracking-[0.14em] text-white/50 hover:text-white transition-colors"
           >
             DONATE
           </Link>
           <Link
             href="/contact?topic=partner"
-            className="px-3 py-2 label text-white/50 hover:text-white transition-colors text-xs sm:text-sm"
+            className="px-2 py-1.5 label text-[10px] tracking-[0.14em] text-white/50 hover:text-white transition-colors"
           >
             PARTNER
           </Link>
           <Link
             href="/#join-program"
-            className="ml-1 bg-white text-black px-4 py-2.5 font-display text-xs sm:text-sm font-semibold tracking-wide hover:bg-white/90 transition-colors"
+            className="ml-0.5 bg-white text-black px-3 py-1.5 font-display text-[10px] font-semibold tracking-[0.12em] hover:bg-white/90 transition-colors"
           >
             JOIN WAITLIST
           </Link>

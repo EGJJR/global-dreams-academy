@@ -57,7 +57,7 @@ export default function GlobalDreamsAcademyLanding() {
   }, [])
 
   const navLinkClass =
-    'px-3 py-2 label text-white/60 hover:text-white border border-transparent hover:border-white/20 transition-all text-xs lg:text-sm'
+    'px-2 py-1.5 label text-[10px] tracking-[0.14em] text-white/60 hover:text-white border border-transparent hover:border-white/20 transition-all'
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-sans relative overflow-x-hidden">
@@ -90,7 +90,7 @@ export default function GlobalDreamsAcademyLanding() {
             </a>
             <a
               href="/#join-program"
-              className="ml-1 bg-white text-black px-4 py-2.5 font-display text-xs lg:text-sm font-semibold tracking-wide hover:bg-white/90 transition-colors"
+              className="ml-0.5 bg-white text-black px-3 py-1.5 font-display text-[10px] font-semibold tracking-[0.12em] hover:bg-white/90 transition-colors"
             >
               JOIN WAITLIST
             </a>
