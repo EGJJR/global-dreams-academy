@@ -1,0 +1,891 @@
+You are watching a basketball play
+broken down by AI frame by frame. Every
+player tracked, every jersey number
+read, every shot classified as made or
+missed. In this video, I'll show you how
+to build this system step by step using
+RFDTR sum tool and small VLM.
+Basketball is tough for vision. Players
+move fast, overlap often, and jersey
+numbers are small, blurred, and
+frequently occluded. To handle this, we
+combine several state-of-the-art
+open-source models into a single
+pipeline. Our goal is to build a
+complete system that identifies every
+player, knows their team, tracks their
+movements, and automatically classifies
+the result of every shot. We'll start
+with RFDR
+for robust object detection. Since
+traditional tracking is unreliable in
+this high-speed high occlusion
+environment, we'll leverage SAM 2 for
+stable pixel level player tracking.
+And to identify teams, we'll deploy an
+unsupervised clustering pipeline built
+around sigip um and kins. Once players
+are tracked, we move on to jersey number
+recognition. We'll fine-tune the compact
+vision language model, small VLM2 for
+OCR, and learn how to pair those
+detected numbers with the correct
+tracked player. Finally, we map players
+onto the court. We train a custom model
+to detect 33 characteristic points on
+the court. We use these points to
+calculate the homography matrix and
+perform the homography transformation
+that projects player positions from the
+2D video frame to an accurate
+standardized 2D court layout. This
+delivers a full top-down tactical
+visualization, so we know precisely who
+is doing what and where on the court.
+This build took months, roughly 1,000
+hours of collective work. You will see
+the full process from data preparation
+and model fine-tuning to model
+deployment. Let's start with object
+detection.
+For object detection, we use RFDRS.
+It offers a strong balance between speed
+and accuracy. On Cocoa Benchmark, RFDRS
+reaches higher accuracy than YOLO 11L
+while running almost twice as fast.
+Since RFDTR uses Dinov2 as its backbone,
+the model converges faster and
+generalizes better to new domains like
+basketball.
+Our data set includes 10 classes. Two
+main ones are player and jersey number.
+We use the player class to detect
+athletes on the court and we use the
+jersey number class to locate digits
+that we will later read and assign to
+players. The player class is divided
+into several subasses such as player
+player in possession, player jump shot,
+player layup dunk, and player shot
+block. These subasses will let us
+determine who is dribbling the ball or
+who is taking the shot. We also include
+ball rim and ball and basket.
+These classes will let us determine the
+result of each play later in the
+pipeline. All images come from 1080p
+video clips. Each clip contains a single
+live bulb play. Each frame got resized
+to 640x 640 resolution and we used
+resize with fill to match the square
+input expected by the model. We don't
+apply extra augmentations.
+RFDTR uses Dynino V2 as its backbone
+which gives strong performance without
+heavy data transforms. This is different
+from typical YOLO style training where
+aggressive augmentation is common. Once
+the data set was ready, we moved to
+fine-tuning. I trained my RFDTR directly
+on the Roboflow platform. By the way,
+all models in this tutorial are already
+trained and free to use. You will find
+links to each of them in the
+description. And if you want to learn
+how to fine-tune RFDTR in Collab,
+there's a dedicated tutorial as well. To
+start, we click custom train, select
+RFDTR, and click continue. Next, we
+choose the model size. I pick RFDTRS and
+click continue again. We then initialize
+the run from a public checkpoint and
+launch training. Depending on data set
+size and image resolution, the process
+takes a few hours. When training
+finishes, the model appears in our
+Roboflow workspace ready for deployment.
+Next, we load the model for inference.
+I'll be using Google Collab where the
+inference Python package is already
+installed. It loads models from RobFlow
+Universe and saves you a lot of headache
+by handling hardware optimization for
+you. To load the model, we import get
+model and pass our model ID and API key.
+The model ID can be copied directly from
+the project URL. It includes the project
+name and model version. To get your API
+key, open your account settings, select
+the correct workspace, and copy one of
+the existing keys or generate a new one.
+Then in collab, open the secrets tab and
+paste your key under the variable name
+Robofflow API key. Now the model is
+loaded and ready. Let's run inference on
+the first frame of our video. We already
+downloaded a small sample of 10 video
+clips from our data set into the collab
+environment. We'll use supervision's
+frame generator for convenient frame
+access. All we need to do is pass the
+source video path and call next to
+extract the first frame of the video. We
+call the infer method of the model and
+pass the frame as an argument. We can
+also set confidence and IO thresholds to
+control prediction precision. The output
+is assigned to a variable then converted
+to a supervision detections object using
+the from inference method. To visualize
+the results, we use supervision
+annotators. We create a box annotator
+and a label annotator. Configure colors,
+line thickness, and text color. and
+apply them to a copy of the input frame.
+You can adjust these settings to improve
+contrast or text readability depending
+on your footage. If we don't specify
+custom labels, the annotator uses the
+class names by default.
+Supervision also allows easy filtering
+of detections based on conditions like
+class. For example, the class number
+corresponds to class ID 2. If we want to
+display only jersey numbers on the
+frame, we set our filtering condition to
+detections class ID equals 2. Filtering
+players is a bit more complex because as
+mentioned earlier, they are split into
+several subclasses which map to class
+ids 3, 4, 5, 6, and 7. In this case, we
+use numpy's as in function passing
+detections class ID and a list of the
+ids we want to keep. This output will
+serve as the input for the tracking step
+with segment anything tool.
+Traditional trackers like sort use
+bounding boxes detected across
+consecutive frames to estimate object
+motion using common filter. filter
+predicts where each object should appear
+in the next frame and then new
+detections are matched to those
+predictions using IOU overlap. More
+advanced trackers like deep sort or by
+track at embeddings calculated using
+object crops to add visual similarity
+which should help when motion cues alone
+are unreliable such as during occlusion
+or rapid movement. Sports scenes are
+among the hardest settings for tracking
+because players move fast, frequently
+overlap, wear similar uniforms, and
+often leave or re-enter the camera's
+view. SAM 2 performs much better than
+regular trackers because it doesn't rely
+on predicted motion or detection
+matching. Instead, it remembers how each
+object looks across frames at the pixel
+level, capturing details like shape,
+color, and texture, which are stored as
+highdimensional visual embeddings. This
+allows it to follow the same player even
+after fast movement, overlap, or
+temporary disappearance.
+This makes it resistant to occlusion,
+deformation, and re-entry challenges
+common in sports.
+SAM 2 needs an initial prompt such as a
+point or bounding box on a single frame
+to start tracking an object through the
+video. To automate this process, we'll
+use detections from our RFDTR model.
+Each detected bounding box becomes a
+prompt for SAM 2, allowing us to start
+tracking every player visible on the
+court without any manual clicks.
+Back in Google Collab, we already have
+SAM 2 installed. If you'd like to see a
+detailed setup, refer to the collab
+linked in the description. SAM 2 comes
+in four sizes, from the lightweight tiny
+with around 39 million parameters to the
+large version with over 220 million
+parameters.
+For this demo, we'll use the large
+version to maximize tracking quality
+even though it runs slower. Sum tool is
+by far the slowest part of entire
+pipeline and using a smaller checkpoint
+is one of the easiest ways to speed it
+up. Something we'll discuss later in the
+video. To load the model, we import the
+build SAM 2 camera predictor function
+from the SAM 2 package. We then pass the
+paths to the SAM 2 checkpoint and its
+associated configuration file. The
+inference code may look complex at
+first, but it follows a simple
+three-step structure. First, we take the
+initial video frame and run inference
+with RFDTR to detect all players. Each
+detection receives a tracker ID, which
+we'll use to link it with SAM 2. Next,
+we loop over the detections and use the
+predictor add new prompt method from the
+SAM 2 API. For each detection, we pass
+the frame index, the tracker ID, and the
+bounding box coordinates.
+This step initializes the prompts for
+every player we want to track. Finally,
+we iterate through the following frames
+and call predictor track, passing the
+new frame as input. The model returns
+mask logs which represent raw
+segmentation scores before thresholding.
+We convert these logs into binary
+segmentation masks. wrap them into
+supervision detections and visualize
+them using the same annotators we used
+earlier. This entire third step is
+wrapped inside a callback function that
+runs automatically for each video frame
+and saves the output as a new video
+file.
+Processing high-action basketball videos
+sometimes leads Sam 2 to make
+segmentation errors. These errors often
+appear as masks consisting of multiple
+disconnected regions that are far apart
+from each other. For example, right
+after a shot or a pass. Some too may
+mistakenly include the ball or a
+background element as part of the
+player's mask.
+These artifacts may look harmless, but
+they can hurt later stages of the
+pipeline, such as team clustering or
+court mapping. To fix this, we apply a
+cleanup function that keeps only the
+main segment of the mask and remove the
+smaller ones whose centroidids are too
+far away. After applying the cleanup
+function, the resulting masks are much
+more stable and reliable. They no longer
+contain large false segments, which
+makes them suitable for downstream tasks
+like team clustering. If you'd like to
+learn more about how to use SAM 2 for
+both image and video segmentation, check
+out the dedicated tutorial linked below.
+Every basketball game is different.
+Different teams, different players,
+different uniforms, and even a different
+court. Training a supervised model to
+tell teams apart means labeling a huge
+amount of player data from different
+games. And I'm way too lazy for that.
+Plus, it probably still wouldn't
+generalize. If the team showed up in the
+new pink jerseys for the first time, our
+model wouldn't know how to handle this.
+We would need to extend the data set
+with new data examples and retrain the
+model. To build a more flexible solution
+that works across games without any
+manual data annotation, we use an
+unsupervised learning approach to
+separate players into their respective
+teams. The first step is to prepare the
+data. We start by going through all the
+sample videos from the selected game.
+From each video, we extract one frame
+per second and run player detection
+using our fine-tuned RFDTR model. For
+every detection, we crop the region
+containing the player. After extracting
+all the crops, we pass them through
+SIGLE and obtain highdimensional
+embeddings. These embeddings are
+powerful, but too large for direct
+visualization or clustering.
+To make them easier to work with, we
+reduce their dimensionality using UMAP.
+UMAP projects highdimensional data into
+a lower dimensional space, in our case,
+three dimensions, while preserving both
+the local and global relationships
+between points that's crucial for
+producing consistent clusters
+downstream.
+Once we have three-dimensional
+embeddings, we apply K means clustering.
+K means is a simple but effective
+algorithm that partitions data into a
+specified number of groups. Here we set
+the number of clusters to two because we
+expect two teams in each game. If the
+process works as expected, the cropped
+player images naturally separate into
+two distinct groups. Each cluster
+corresponds to one team purely based on
+uniform color and visual features. Just
+like in our football AI tutorial, we
+wrapped this entire SIG leap um and K
+means pipeline into a single class
+called team classifier which is part of
+our open-source sports repository. This
+makes it easy to reuse. To run the
+pipeline, all we need to do is
+instantiate the team classifier object
+and call its fit method passing in a
+list of player crops.
+Training takes only a few seconds. When
+it's done, we call predict to assign
+each crop to one of the two clusters.
+Now, let's test our team classifier. We
+take the first frame from our video,
+detect all players using RFDTR, crop
+each of them, and pass this crops to the
+team classifier to divide players into
+teams. At this stage, we don't know the
+actual team names, but we know which
+players belong to the same team. Each
+crop is labeled with either zero or one,
+representing the two clusters. To map
+these clusters to real team names, we
+provide a simple external input. For
+example, mapping zero to Boston Celtics
+and one to New York Knicks. This mapping
+allows us to visualize players from each
+team in distinct colors corresponding to
+their uniforms.
+By the way, a model like Quen 3VL can
+look at a group of players and name the
+NBA team they play for. I left it out to
+avoid extra complexity, but the problem
+is fully solvable with open-source
+models. If you want to learn more, check
+our open vocabulary object detection
+with Quen 3VL notebook. The link is in
+the description. The code you see on
+screen is very similar to the one we
+used for tracking with SAM 2. But this
+time, in addition to assigning tracker
+IDs to detections, we also assign team
+IDs. Since the tracks produced by SAM 2
+are stable over time, we only need to
+perform team clustering once. After
+that, we simply reference the stored
+team assignments for each video frame.
+To visualize the results, we rely on box
+annotator and mask annotator configured
+to color each player according to their
+team assignment. Inside our callback
+function, we split the masks by team ID
+and pass them to the annotators, which
+apply the correct colors across all
+frames. This step gives us a clean
+color-coded visualization, showing which
+players belong to which team. It's a key
+step that sets up everything that
+follows, mapping jersey numbers to
+names, detecting player actions, and
+building our final analytics
+visualizations.
+With players tracked and teams
+identified, the next step is to read the
+jersey numbers and pair them with
+correct players. Reading jersey numbers
+might sound simple, but in practice,
+it's a tough task. Numbers are often
+small, sometimes partially occluded, and
+appear under varying lighting and motion
+blur. They can also deform with player
+movement or fold along the jerseys
+fabric. A model trained for document OCR
+doesn't usually expect that. We started
+by experimenting with small VLM2, a
+compact vision language model designed
+for OCR and visual reasoning tasks.
+Because of its small size, small VLM2 is
+both powerful and fast, making it an
+attractive candidate for our pipeline.
+Even though it was pre-trained mainly on
+document style text, it transferred
+surprisingly well to basketball jersey
+numbers. Right out of the box, it
+reached 56% accuracy on our test set.
+That wasn't enough for reliable player
+recognition, and it sometimes produced
+impossible results like 011 or 3000 dot
+that do not appear on real jerseys. To
+improve performance, we fine-tuned small
+VLM2 on a custom data set of jersey
+number crops. We took frames from our
+object detection data set, filtered out
+only the number class, and cropped the
+detected numbers. We then used the
+pre-trained small VLM2 itself to auto
+annotate those crops, creating labeled
+examples automatically.
+This gave us a multimodal OCR data set
+containing 3.6,000 images. Each image
+was resized to 224x
+224 pixels stretched to fill the square
+format just like we did for object
+detection.
+We uploaded this data set to Roboflow to
+prepare it for fine-tuning. Before
+starting training, we manually reviewed
+all labels and fixed mistakes. After
+verifying the data set, we moved on to
+training. We start from the model
+version page. Here we click custom train
+to open the training setup. From the
+list of available models, we select
+small VLM, then continue. Next, we pick
+small VLM to Laura from the version
+list. confirm the choice and proceed.
+Finally, we choose train from public
+checkpoint and click start training to
+launch the run. As the model trains, we
+monitor progress directly in the browser
+with live accuracy and loss charts. Once
+fine-tuning finishes, the test accuracy
+reaches 86% showing clear progress
+compared to the base model.
+Back in Google Collab, we deploy our
+fine-tuned model. Just like before, we
+use the get model method from the
+inference package. This time passing the
+model ID of our fine-tuned small VLM2,
+which you can copy from the project URL
+alongside the model. We define the
+prompt we'll use for OCR inference. To
+test it, we once again load the first
+frame of our source video. We use RFDTR
+to detect all bounding boxes of the
+number class. Then we loop over these
+boxes, add a small padding for extra
+context, and crop them out. Finally, we
+loop over all crops and call the predict
+method of our fine-tuned small VLM2,
+passing both the crop and the prompt as
+inputs. Each prediction returns a
+recognized number, which we can display
+next to the corresponding crop for
+visual confirmation. Once jersey numbers
+are detected, we need to assign them to
+the correct players. Player masks from
+SAM 2 and number detections from RFDTR
+are separate outputs. So we need a
+reliable way to match them. We'll use
+intersection over a smaller area. IOS is
+similar to IOU but normalizes over
+smaller region. An iOS of one means a
+number mask lies completely within the
+player mask. Therefore we infer that
+number belongs to that player. We run
+RFDTR for numbers and SAM two for player
+masks on the same frame. We convert
+number boxes to masks with XYXY to mask.
+Then we call mask IO batch passing
+player masks number masks and setting
+the metric to iOS. The result is a
+matrix of players by numbers with the
+overlap scores. We look for pairs where
+iOS equals 1.0. Once we find these
+pairs, we plot their bounding boxes and
+mark each pair with a different color.
+The problem is that a single frame
+rarely gives matches for all players at
+once. For example, five out of 10
+players might be matched while the rest
+are turned away and their numbers are
+not visible. Even when the crop looks
+good, small VLM2 can return the wrong
+value on a single frame. Because of
+these two factors, we base number
+association on more than one frame. Now,
+the final step is to match each
+confirmed number and team to a player
+from the roster. I prepared a Python
+dictionary listing all player names and
+numbers for both teams in this game.
+Pulling this data from the web is quick
+and there are APIs you can use as well.
+Once we have it, we take the team ID and
+the locked jersey number for each
+tracked player, look them up in the
+dictionary and retrieve the player's
+name. The rest is visualization using
+supervision to overlay names, numbers,
+and team colors on the video.
+Now that we know who is on the court, we
+need to know where they are on the
+court. And for that, we will use
+homography. Homography allows you to map
+points from one flat surface to another.
+You know this idea from document
+scanning apps. You take a photo at an
+angle. The perspective distorts the
+page, but the app turns it into clean
+top-down view. We'll use the same idea
+here, but instead of working with
+documents, we'll work with basketball
+court. A homography defines a
+mathematical relationship between two
+planes. One of these planes can be the
+camera view of the court and the other
+can be the top-down layout of the
+basketball floor. Using this
+relationship, we can transform any point
+from one plane to its corresponding
+location on the other. This
+transformation is represented by a 3x3
+matrix, often called the homography
+matrix.
+To calculate it, we need at least four
+pairs of corresponding points between
+the two planes. Once computed, the
+matrix allows us to project any pixel
+from the camera perspective onto the
+flat top- down map of the court. But
+there's a catch. Basketball cameras
+constantly pan, tilt, and move to follow
+the play. And as the camera moves, the
+visible part of the court and reference
+point change. Marking them manually
+makes no sense. So, we need a way to
+automatically detect them on every
+frame. That's where keyoint detection
+model comes in. Key point detection
+predicts a fixed set of landmarks each
+defined by an ID and its XY coordinates.
+Think pose estimation, but the skeleton
+is the court layout.
+Since the camera rarely shows the full
+court, we need enough landmarks to keep
+at least four visible at all times. At
+the same time, the points must be easy
+to recognize and annotate. I defined 33
+key points covering the main chord
+features including corners, baselines,
+the center, the paint, the arcs, and one
+point directly under each basket. Each
+point has its own index and serves as a
+homography reference. Labeling them was
+by far the most timeconuming part of
+this project. Ultimately, we managed to
+collect and annotate 850 images. In
+Roboflow, we also define flip indexes to
+describe symmetry for horizontal flip
+augmentation. For example, the top left
+corner with index 01 corresponds to the
+top right corner with index 34. This
+ensures that when the image is flipped
+during training, the left and right
+sides of the court remain correctly
+mapped. Once the data set was ready, we
+move to fine-tuning. Just like with
+other models, we start on the data set
+version page where we click custom
+train. From the list of available
+architectures, we select YOLO 11 and
+click continue. Next, we choose the
+model size. I recommend medium or large.
+Going for extra large is overkill and
+anything below medium is too low quality
+to use reliably for perspective
+conversion.
+Click continue again. Select train from
+public checkpoint. And finally, click
+start training.
+The training runs in the cloud and you
+can monitor progress directly in your
+browser. Once it completes, your
+fine-tuned court keyoint model will
+appear in your Rooflow workspace ready
+for deployment.
+Let's load the model and see how it
+performs. We'll again use the inference
+package. We already imported the get
+model function earlier, so we just call
+it and pass the model ID that matches
+your trained version. Next, we grab one
+frame from our video sample. We call
+model infer, passing the frame as input.
+The output is stored in a variable, then
+converted into a supervision keyoints
+object using the from inference method.
+Finally, we visualize them using the
+vertex annotator, which overlays each
+predicted point as a small dot in its
+corresponding position on the frame.
+At first glance, the key points look
+scattered. Some land on real chord
+features. Others show up in random
+spots. This happens because the model
+predicts every key point even when parts
+of the chord are not visible. Occluded
+or offscreen points lead to noisy
+guesses. Each point has a confidence
+score that reflects how sure the model
+is. Visible features like the paint or
+center circle score high while offscreen
+points or points occluded by the players
+score low. This scores allows us to
+filter out reliable landmarks from
+uncertain ones. Let's filter them out.
+We set the anchor confidence threshold
+to 0.5 which keeps only the points the
+model is confident about.
+points we use for homography need to be
+extremely precise because any error
+directly affects the computed homography
+matrix and makes the perspective
+conversion inaccurate.
+After filtering the remaining points
+align neatly with visible chord features
+and can be safely used for mapping. Now
+that we have both player detections and
+court key points, we can finally bring
+them together and map each player's
+position from the video frame to real
+world coordinates on the basketball
+court.
+To map player position from camera view
+onto the court, we first need to
+calculate homography matrix. This matrix
+mathematically defines how points on
+video frame relate to points on actual
+basketball court. And to calculate it,
+we need four pairs of such reference
+points. The reference points in the
+camera view come from our keypoint
+detection model. Their real world
+equivalents are defined manually based
+on the geometry and dimensions of the
+court. All these coordinates are stored
+in the chord configuration class.
+Importantly, the order of points in the
+keyoint detection model result and in
+court configuration is the same. For
+example, the top left corner of the
+court is described by the anchor with
+the same index in both the keyoint model
+output and in chord configuration. After
+running inference with the keyoint
+model, we create a mask describing which
+anchors have confidence above the
+threshold. Using this mask, we extract
+two aligned arrays.
+Frame landmarks from the keyoint
+predictions and court landmarks from
+chord configuration vertices.
+If at least four such pairs exist, we
+initialize the view transformer passing
+both arrays as input. Inside it computes
+and stores the 3x3 homography matrix
+that defines the mapping from the video
+frame to the court. Now we're ready to
+project player positions. We take the
+detections object produced by either
+RFDTR or SAM to tracking and call get
+anchors coordinates on it to get the
+bottom center coordinates for each
+player. Then we call the transform
+points method of the view transformer
+class passing the player coordinates.
+This converts their positions from image
+space to court space. To visualize the
+result, we draw the court and plot the
+transformed player positions using draw
+points on court. Coloring players from
+each team differently.
+However, when we repeat this
+transformation frame by frame across the
+video, the results aren't stable. You'll
+notice that player positions sometimes
+jeter or jump between frames. Homography
+assumes that all mapped points lie on a
+flat surface. In our case, the
+basketball court. To locate a player on
+that surface, we assume the bottom
+center of their detection bounding box
+corresponds to where they touch the
+ground. But when the player jumps or
+when two players overlap, the bounding
+box shifts upward and its bottom center
+no longer represents the true ground
+position. Even small vertical change can
+project to large displacements when
+mapped onto the chord plane.
+To make these trajectories usable, we
+need to clean them. We start with two D
+player coordinates across consecutive
+frames. When we connect these points, we
+get the player's trajectory. And you can
+immediately see how it jumps unnaturally
+at times. To detect those teleport-like
+jumps, we measure the player's movement
+between frames as frameto frame speed.
+We then calculate the median of all
+speeds to understand what typical motion
+looks like and compute the median
+absolute deviation, which measures how
+much those speeds usually vary from that
+median. If a player's movement in a
+single frame is greater than the medium
+by several times mad and also exceeds a
+minimum absolute distance, we flag it as
+unrealistic. Once we identify these
+outliers, we group them into short runs
+and pat a few frames around each to make
+sure we remove all noisy edges. We then
+rebuild those missing sections through
+linear interpolation, connecting valid
+points before and after the corrupted
+segment with straight lines. After
+restoring the basic trajectory, we
+smooth it using a small sliding window
+that fits gentle curves along the path.
+When applied across an entire game, this
+cleanup process produces smooth and
+reliable movement data that can be used
+for automatic tactical analysis. It
+helps reveal patterns like frequently
+played actions, hotspots where players
+appear most often, and even the total
+distance each athlete covers during the
+match. The obvious downside of this
+solution is that it can't run in real
+time. The cleanup function needs access
+to full player trajectory before it can
+decide which points to remove,
+interpolate, and smooth. This makes it
+ideal for postgame analysis, but not for
+real-time tracking or instant replays.
+The last thing I want to show you today
+is shop detection and result
+classification. We'll start with the
+same object detection model we trained
+earlier. As I mentioned at the beginning
+of the video, while building the data
+set, we made sure to include all classes
+related to shooting action. Player
+jumpshack, player layup, dang, and
+bowling basket. These classes let us
+detect both the shooting motion and the
+shot outcome. Let's load a video frame
+where a player takes a jump shot and run
+object detection. Just like before, the
+model correctly highlights the player as
+player jumpshot using supervision. We
+can easily filter detections and keep
+only those corresponding to that class.
+The jumpshot label has a class ID of
+five. So we pass that condition in
+square brackets to isolate it. Mapping
+this detected shot position onto the
+court works the same way as mapping any
+player position. We run the keyoint
+detection model on the same frame. Keep
+only high confidence court landmarks,
+build the homography matrix and project
+the detected player onto the court
+plane. We can then mark the shot
+position with the draw made and miss on
+court annotator. The problem is, as I
+mentioned before, the homography
+projection only works when the player is
+on the ground and his feet are visible.
+When player is midair or partially
+occluded, the bottom center of his
+bounding box no longer represent his
+true position on the court. In other
+words, if we detect the jump shot when
+the player is in the air, it's already
+too late. The projection will land in
+the wrong place and we will mark the
+wrong spot for the jump shot. That's
+where the shot event tracker from the
+sports repository comes in. The tracker
+looks at a sequence of frames and
+watches for consistent visual patterns.
+When it sees several consecutive
+detections of player jump shot or player
+layup dunk, it treats that as the start
+of a shot attempt. It then waits for a
+short window of time to see if the ball
+and basket class appears soon after. If
+it does, the shot is marked as made. If
+the window expires without seeing the
+ball in the basket, the shot is marked
+as missed. As a result, shot event
+tracker gives us a reliable stream of
+events, start, made, or missed, each
+with corresponding frame ID and shot
+type, whether jumpsh shot, dunk, or
+layup. Let's switch back to Google
+Collab and see how it works in practice.
+We load our sample video and initialize
+the tracker with three simple timing
+parameters that define shot duration,
+cool down, and spacing between attempts.
+Then, as we loop through the frames, we
+run object detection and check for three
+key classes, jumpshot, layup, and ball
+and basket.
+For each frame, we call the tracker
+update method with these detections. And
+whenever it detects a new event, we
+print it and visualize the frame with
+bounding boxes and labels.
+Here's what happened in our example
+clip. At frame 64, the tracker locks a
+start event for a jump shot. At frame
+115, it marks that attempt as missed.
+Then at frame 120, it detects a start
+event for a layup. And by frame 135, it
+records a made event. On the screen, you
+can see the sequence unfold. The player
+takes the jump shot, misses, grabs the
+rebound, and scores with the putback
+layup. We can now process longer
+sequences of plays to collect structured
+shot events, including both the type and
+outcome of each attempt. When combined
+with the homography mapping we built
+earlier, these events can be projected
+onto the court to form a complete shot
+chart, showing where each attempt
+happened, who took it, and whether it
+was made or missed. This creates a clear
+visual foundation for analyzing shot
+tendencies and scoring patterns.
+And that's all the code I wanted to show
+you today. This was by far the most
+ambitious project we ever showcased on
+this channel. You saw how RFDR, SAM
+tool, Small VM and SIGLIP can be used
+together [music] to detect players,
+track their movements, cluster them into
+teams, map their positions on the floor,
+[music] and classify shots into makes or
+misses. All the code, models, notebooks
+[music] I used in this tutorial sit in
+the description below. So, feel free to
+explore them, run them with your own
+footage, [music] and tweak the ideas to
+build even cooler stuff. If you have any
+questions or suggestions, leave them in
+the comments below. [music] And if you
+enjoyed the video, make sure to like and
+subscribe, and stay tuned for more
+computer vision content coming to this
+channel soon. My name is Peter, and I
+see you [music] next time.
+Bye.
+Hey.
