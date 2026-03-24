@@ -179,13 +179,23 @@ export default function GlobalDreamsAcademyLanding() {
               Global Dreams<br />
               <span className="text-white/40">Academy.</span>
             </h1>
-            <p className="font-body text-white/55 text-lg sm:text-xl mb-4 max-w-xl leading-relaxed">
+            {/* Mobile: concise */}
+            <p className="font-body text-white/55 text-base leading-relaxed mb-3 max-w-xl md:hidden">
+              Performance basketball for grades 8–12: training, league play, and mentorship—skills,
+              discipline, and basketball IQ for the next level.
+            </p>
+            <p className="font-body text-white/45 text-sm leading-relaxed mb-8 max-w-xl md:hidden">
+              Academics, leadership, and community. Berrien Springs — now enrolling{' '}
+              <span className="text-white/70">Spring 2026</span>.
+            </p>
+            {/* Tablet/desktop: full */}
+            <p className="hidden md:block font-body text-white/55 text-lg sm:text-xl mb-4 max-w-xl leading-relaxed">
               Global Dreams Academy is a performance basketball development program for motivated
               8th–12th grade student-athletes who want to elevate their game and future. Through
               high-level training, competitive play, and mentorship, athletes develop the skills,
               discipline, and basketball IQ needed to succeed at the next level.
             </p>
-            <p className="font-body text-white/45 text-base sm:text-lg mb-8 sm:mb-10 max-w-xl">
+            <p className="hidden md:block font-body text-white/45 text-base sm:text-lg mb-8 sm:mb-10 max-w-xl">
               Our program values academic excellence, leadership, and community impact. Based in
               Berrien Springs with a global vision — now accepting applications for the{' '}
               <span className="text-white/70">Spring 2026</span> session.
