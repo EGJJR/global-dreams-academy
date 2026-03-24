@@ -38,6 +38,7 @@ export default function LeadershipPage() {
                 src="/images/ian.jpg"
                 alt="Ian Ochieng, Founder & Program Director"
                 fill
+                sizes="(max-width: 768px) 100vw, 400px"
                 className="object-cover object-top"
                 priority
               />
