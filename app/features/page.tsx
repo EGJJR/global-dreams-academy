@@ -289,7 +289,7 @@ export default function FeaturesPage() {
             ))}
           </div>
           <div className="label text-white/20">
-            © 2025 VANTAGE AI
+            © 2025 Global Dreams Academy
           </div>
         </div>
       </footer>

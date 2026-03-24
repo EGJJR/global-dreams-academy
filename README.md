@@ -1,55 +1,29 @@
-# VANTAGE - AI Coaching Engine
+# Global Dreams Academy
 
-A Next.js landing page for VANTAGE, an AI coaching engine that analyzes opponent tendencies to generate winning plays in real-time.
+Next.js site for **Global Dreams Academy** — a youth basketball development program (Luo Lakeside Group LLC) — plus the **command center** dashboard for video analysis.
 
 ## Getting Started
 
-First, install the dependencies:
-
 ```bash
 npm install
-```
-
-Then, run the development server:
-
-```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-## Features
+## Scripts
 
-- Modern, tech-forward design with HUD-style UI elements
-- Smooth animations using Framer Motion
-- Responsive design for all screen sizes
-- Dark theme with neon accents
-- Interactive components with hover effects
+- `npm run dev` — development server  
+- `npm run build` / `npm start` — production build  
 
 ## Tech Stack
 
-- **Next.js 14** - React framework
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Styling
-- **Framer Motion** - Animations
-- **Lucide React** - Icons
+Next.js 14, TypeScript, Tailwind CSS, Framer Motion, Lucide React.
 
-## Project Structure
+## Environment
 
-```
-├── app/
-│   ├── layout.tsx      # Root layout
-│   ├── page.tsx        # Main landing page
-│   └── globals.css     # Global styles
-├── package.json
-├── tailwind.config.js
-└── tsconfig.json
-```
+- `NEXT_PUBLIC_API_URL` — backend URL for the dashboard (defaults to `http://localhost:8000` in development).
 
-## Build for Production
+## Deploy
 
-```bash
-npm run build
-npm start
-```
-
+Configured for [Vercel](https://vercel.com). Rename the Vercel project to **global-dreams-academy** (or similar) in **Project → Settings → General** if it still shows the old slug.

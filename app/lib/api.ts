@@ -1,8 +1,8 @@
 /**
- * VANTAGE API Client
- * 
- * Connects to the vantage-engine Python backend
- * API Base URL should be set in .env.local as NEXT_PUBLIC_API_URL
+ * Video analysis API client (dashboard / command center)
+ *
+ * Connects to the Python analysis backend. Set base URL in `.env.local` as
+ * `NEXT_PUBLIC_API_URL` (and in Vercel project env for production).
  */
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';

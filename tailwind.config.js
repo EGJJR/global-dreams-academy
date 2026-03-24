@@ -16,12 +16,12 @@ module.exports = {
         'spin-slow': 'spin 3s linear infinite',
       },
       colors: {
-        'vantage': {
-          'black': '#0a0a0a',
-          'white': '#f5f5f5',
-          'accent': '#ff6b00',
-        }
-      }
+        gda: {
+          black: '#0a0a0a',
+          white: '#f5f5f5',
+          accent: '#ff6b00',
+        },
+      },
     },
   },
   plugins: [],
