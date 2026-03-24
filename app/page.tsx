@@ -323,7 +323,7 @@ export default function GlobalDreamsAcademyLanding() {
             >
               <div className="relative aspect-[4/3] rounded-sm overflow-hidden bg-black">
                 <Image
-                  src="/images/IAN.jpg"
+                  src="/images/ian.jpg"
                   alt="Ian Ochieng, Founder & Program Director"
                   fill
                   className="object-cover object-top grayscale-[30%] opacity-90 scale-105"

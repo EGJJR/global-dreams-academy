@@ -35,7 +35,7 @@ export default function LeadershipPage() {
               className="relative aspect-[4/5] rounded-sm overflow-hidden bg-black max-w-md mx-auto md:mx-0"
             >
               <Image
-                src="/images/IAN.jpg"
+                src="/images/ian.jpg"
                 alt="Ian Ochieng, Founder & Program Director"
                 fill
                 className="object-cover object-top"
