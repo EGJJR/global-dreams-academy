@@ -7,6 +7,28 @@ import { motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
 import { GdaPublicFooter, GdaPublicNav } from '../components/GdaPublicNav'
 
+function LeadershipPortrait({ className = '' }: { className?: string }) {
+  return (
+    <div
+      className={`relative aspect-[4/5] rounded-sm overflow-hidden bg-black ${className}`}
+    >
+      <Image
+        src="/images/ian.jpg"
+        alt="Ian Ochieng, Founder & Program Director"
+        fill
+        sizes="(max-width: 768px) 100vw, 400px"
+        className="object-cover object-top"
+        priority
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute bottom-4 left-4 right-4">
+        <p className="font-display text-xl font-bold text-white">Ian Ochieng</p>
+        <p className="label text-white/60">Founder &amp; Program Director</p>
+      </div>
+    </div>
+  )
+}
+
 export default function LeadershipPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
@@ -23,7 +45,17 @@ export default function LeadershipPage() {
           </Link>
 
           <div className="label text-orange-500 mb-4">LEADERSHIP</div>
-          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold uppercase tracking-tight mb-10 leading-[0.95]">
+
+          {/* Mobile: portrait first so it appears above the fold */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="md:hidden mb-8 w-full max-w-sm mx-auto"
+          >
+            <LeadershipPortrait className="w-full shadow-lg shadow-black/40" />
+          </motion.div>
+
+          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold uppercase tracking-tight mb-8 md:mb-10 leading-[0.95]">
             Founder &amp;<br />
             <span className="text-white/40">Program Director</span>
           </h1>
@@ -32,21 +64,9 @@ export default function LeadershipPage() {
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative aspect-[4/5] rounded-sm overflow-hidden bg-black max-w-md mx-auto md:mx-0"
+              className="hidden md:block max-w-md mx-0"
             >
-              <Image
-                src="/images/ian.jpg"
-                alt="Ian Ochieng, Founder & Program Director"
-                fill
-                sizes="(max-width: 768px) 100vw, 400px"
-                className="object-cover object-top"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-4 left-4 right-4">
-                <p className="font-display text-xl font-bold text-white">Ian Ochieng</p>
-                <p className="label text-white/60">Founder &amp; Program Director</p>
-              </div>
+              <LeadershipPortrait />
             </motion.div>
 
             <motion.div
