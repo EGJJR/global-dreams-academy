@@ -179,15 +179,17 @@ export default function GlobalDreamsAcademyLanding() {
               Global Dreams<br />
               <span className="text-white/40">Academy.</span>
             </h1>
-            {/* Mobile: concise */}
-            <p className="font-body text-white/55 text-base leading-relaxed mb-3 max-w-xl md:hidden">
-              Performance basketball for grades 8–12: training, league play, and mentorship—skills,
-              discipline, and basketball IQ for the next level.
-            </p>
-            <p className="font-body text-white/45 text-sm leading-relaxed mb-8 max-w-xl md:hidden">
-              Academics, leadership, and community. Berrien Springs — now enrolling{' '}
-              <span className="text-white/70">Spring 2026</span>.
-            </p>
+            {/* Mobile: concise — single column, even spacing, no awkward em-dash wraps */}
+            <div className="md:hidden mb-9 space-y-3.5 max-w-[22rem]">
+              <p className="font-body text-white/65 text-[15px] leading-[1.45] text-pretty">
+                Performance basketball for grades 8–12. Training, league play, and mentorship—building
+                skills, discipline, and basketball IQ for the next level.
+              </p>
+              <p className="font-body text-white/45 text-[14px] leading-[1.5] text-pretty">
+                Academics, leadership, and community. Berrien Springs — now enrolling{' '}
+                <span className="text-white/75 font-medium">Spring 2026</span>.
+              </p>
+            </div>
             {/* Tablet/desktop: full */}
             <p className="hidden md:block font-body text-white/55 text-lg sm:text-xl mb-4 max-w-xl leading-relaxed">
               Global Dreams Academy is a performance basketball development program for motivated
