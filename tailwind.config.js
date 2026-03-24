@@ -8,8 +8,14 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        display: ['var(--font-display)', 'Trade Gothic', 'Arial Narrow', 'sans-serif'],
-        body: ['var(--font-body)', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+        display: [
+          'var(--font-display)',
+          'Futura',
+          'Century Gothic',
+          'Arial Narrow',
+          'sans-serif',
+        ],
+        body: ['var(--font-body)', 'Helvetica', 'Helvetica Neue', 'Arial', 'sans-serif'],
       },
       animation: {
         'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
