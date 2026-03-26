@@ -4,9 +4,6 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'Global Dreams Academy - Youth Basketball Development',
   description: 'A youth basketball development league and training program focused on skill development, leadership growth, and community engagement.',
-  icons: {
-    icon: '/favicon.svg',
-  },
 }
 
 export const viewport: Viewport = {

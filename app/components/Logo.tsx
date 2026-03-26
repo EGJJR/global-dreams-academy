@@ -116,29 +116,15 @@ export const Logo = ({
   );
 };
 
-// Simplified inline logo for navigation
-export const LogoInline = ({ 
-  className = '', 
-  showText = true 
-}: { 
-  className?: string;
-  showText?: boolean;
+// Wordmark only for navigation (no mark/icon beside the name)
+export const LogoInline = ({
+  className = '',
+  showText = true,
+}: {
+  className?: string
+  showText?: boolean
 }) => (
-  <div className={`flex items-center gap-3 ${className}`}>
-    <svg 
-      width="24" 
-      height="24" 
-      viewBox="0 0 32 32" 
-      fill="none" 
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Basketball icon */}
-      <circle cx="16" cy="16" r="10" stroke="currentColor" strokeWidth="2" fill="none"/>
-      <line x1="16" y1="6" x2="16" y2="26" stroke="currentColor" strokeWidth="2"/>
-      <line x1="6" y1="16" x2="26" y2="16" stroke="currentColor" strokeWidth="2"/>
-      <path d="M6 6L26 26" stroke="currentColor" strokeWidth="2"/>
-      <path d="M26 6L6 26" stroke="currentColor" strokeWidth="2"/>
-    </svg>
+  <div className={`flex items-center ${className}`}>
     {showText && (
       <span className="font-display text-xs sm:text-lg font-bold tracking-tight leading-tight max-[380px]:max-w-[11rem] max-[380px]:truncate sm:max-w-none sm:whitespace-normal">
         Global Dreams Academy
@@ -148,4 +134,3 @@ export const LogoInline = ({
 );
 
 export default Logo;
-
