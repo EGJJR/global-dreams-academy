@@ -364,7 +364,7 @@ export default function GlobalDreamsAcademyLanding() {
         id="join-program"
         className="py-20 sm:py-28 px-4 sm:px-6 border-t border-white/10 bg-[#0a0a0a] scroll-mt-24"
       >
-        <div className="max-w-xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <JoinProgramForm />
         </div>
       </section>

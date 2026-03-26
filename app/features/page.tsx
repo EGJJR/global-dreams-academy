@@ -62,7 +62,7 @@ const FeatureBlock = ({
       
       {/* Quote */}
       <p className="font-body text-base sm:text-xl md:text-2xl text-white/70 italic mb-4 sm:mb-6">
-        "{quote}"
+        &ldquo;{quote}&rdquo;
       </p>
       
       {/* Description */}
@@ -245,7 +245,7 @@ export default function FeaturesPage() {
             
             <h2 className="font-display text-4xl sm:text-5xl md:text-7xl font-bold uppercase tracking-tight mb-6 sm:mb-8 leading-[0.9]">
               See What<br />
-              <span className="text-white/30">They Can't.</span>
+              <span className="text-white/30">They Can&apos;t.</span>
             </h2>
             
             <p className="font-body text-white/50 text-base sm:text-xl mb-8 sm:mb-12 max-w-xl mx-auto px-4">

@@ -109,6 +109,17 @@ const InfoCard = ({
 
 export type TopicBanner = 'donate' | 'partner' | null
 
+const CONTACT_EMAIL = 'info@globaldreamsacademy.org'
+
+const roleOptions = [
+  { value: 'parent', label: 'Parent' },
+  { value: 'athlete', label: 'Athlete (Grades 8-11)' },
+  { value: 'coach', label: 'Coach' },
+  { value: 'school-staff', label: 'School Staff' },
+  { value: 'community-member', label: 'Community Member' },
+  { value: 'other', label: 'Other' },
+]
+
 export default function ContactPageClient({ topicBanner }: { topicBanner: TopicBanner }) {
   const [formData, setFormData] = useState({
     name: '',
@@ -121,6 +132,25 @@ export default function ContactPageClient({ topicBanner }: { topicBanner: TopicB
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    let subject = 'Global Dreams Academy — Website contact'
+    if (topicBanner === 'partner') subject = 'Global Dreams Academy — Partner inquiry'
+    if (topicBanner === 'donate') subject = 'Global Dreams Academy — Support / donate'
+
+    const roleLabel =
+      roleOptions.find((r) => r.value === formData.role)?.label ?? (formData.role || '—')
+
+    const body = [
+      `Name: ${formData.name}`,
+      `Email: ${formData.email}`,
+      `Organization: ${formData.organization || '—'}`,
+      `Role: ${roleLabel}`,
+      '',
+      'Message:',
+      formData.message,
+    ].join('\n')
+
+    const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    window.location.assign(mailto)
     setSubmitted(true)
   }
 
@@ -131,15 +161,6 @@ export default function ContactPageClient({ topicBanner }: { topicBanner: TopicB
   const handleSelectChange = (value: string) => {
     setFormData({ ...formData, role: value })
   }
-
-  const roleOptions = [
-    { value: 'parent', label: 'Parent' },
-    { value: 'athlete', label: 'Athlete (Grades 8-11)' },
-    { value: 'coach', label: 'Coach' },
-    { value: 'school-staff', label: 'School Staff' },
-    { value: 'community-member', label: 'Community Member' },
-    { value: 'other', label: 'Other' },
-  ]
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white relative overflow-x-hidden">
@@ -240,7 +261,7 @@ export default function ContactPageClient({ topicBanner }: { topicBanner: TopicB
                 </h1>
                 <p className="font-body text-white/50 text-base sm:text-lg mb-8 sm:mb-12 max-w-md leading-relaxed">
                   Have questions about Global Dreams Academy? Want to learn more about our youth basketball development program?
-                  We'd love to hear from you.
+                  We&apos;d love to hear from you.
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
@@ -355,11 +376,12 @@ export default function ContactPageClient({ topicBanner }: { topicBanner: TopicB
               </div>
 
               <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold uppercase tracking-tight mb-4 sm:mb-6">
-                Message Sent
+                Open your email app
               </h2>
 
               <p className="font-body text-white/50 text-base sm:text-lg mb-8 sm:mb-12 px-4">
-                Thanks for reaching out. We'll get back to you shortly.
+                Your default mail app should open with a draft to {CONTACT_EMAIL}. Send the message
+                when you&apos;re ready. If nothing opened, email us directly or try again.
               </p>
 
               <Link

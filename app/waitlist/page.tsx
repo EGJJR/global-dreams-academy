@@ -26,7 +26,7 @@ export default function WaitlistPage() {
             <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a]/85 to-[#0a0a0a]" />
           </div>
 
-          <div className="relative z-10 max-w-xl mx-auto">
+          <div className="relative z-10 max-w-4xl mx-auto">
             <Link
               href="/"
               className="inline-flex items-center gap-2 text-white/40 hover:text-white label mb-8 sm:mb-12 transition-colors"
