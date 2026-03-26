@@ -24,10 +24,10 @@ export function JoinProgramForm({
         Complete the official Spring registration form (parent or guardian must submit). Questions? Reach
         Ian Ochieng at{' '}
         <a
-          href="mailto:luolakesidegroup@gmail.com"
+          href="mailto:globaldreamshoops@gmail.com"
           className="text-orange-400 hover:text-orange-300 underline underline-offset-2"
         >
-          luolakesidegroup@gmail.com
+          globaldreamshoops@gmail.com
         </a>{' '}
         or{' '}
         <a href="tel:+12699214924" className="text-orange-400 hover:text-orange-300">
