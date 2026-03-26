@@ -109,7 +109,7 @@ const InfoCard = ({
 
 export type TopicBanner = 'donate' | 'partner' | null
 
-const CONTACT_EMAIL = 'info@globaldreamsacademy.org'
+const CONTACT_EMAIL = 'globaldreamshoops@gmail.com'
 
 const roleOptions = [
   { value: 'parent', label: 'Parent' },
@@ -335,8 +335,8 @@ export default function ContactPageClient({ topicBanner }: { topicBanner: TopicB
                   <InfoCard
                     icon={Mail}
                     label="EMAIL"
-                    value="info@globaldreamsacademy.org"
-                    href="mailto:info@globaldreamsacademy.org"
+                    value="globaldreamshoops@gmail.com"
+                    href="mailto:globaldreamshoops@gmail.com"
                   />
 
                   <InfoCard icon={MapPin} label="LOCATION" value="Berrien Springs, MI" />
